@@ -1,6 +1,8 @@
 using System;
 using Unity.VisualScripting;
+using UnityEditor.Animations;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 public class PlatformerController : MonoBehaviour
@@ -12,17 +14,24 @@ public class PlatformerController : MonoBehaviour
     bool canDoubleJump = true;
 
 
+    private Animator playerAnim;
+
+    private SpriteRenderer playerSpriteRenderer;
+    bool isFacingRight = true;
     private Rigidbody2D rb;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        playerAnim = GetComponent<Animator>();
+        playerSpriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        playerAnim.SetBool("isGrounded", isGrounded);
+
     }
 
     void OnMove(InputValue value)
@@ -31,6 +40,17 @@ public class PlatformerController : MonoBehaviour
         Debug.Log(v);
 
         rb.linearVelocity = new Vector2(v.x * speed, rb.linearVelocity.y);
+        playerAnim.SetBool("isRunning", rb.linearVelocity.x != 0);
+        if((v.x < 0) && isFacingRight)
+        {    
+            playerSpriteRenderer.flipX = true;
+            isFacingRight = false;
+        }
+        if ((v.x > 0) && !isFacingRight)
+        {
+            playerSpriteRenderer.flipX = false;
+            isFacingRight = true;
+        }
     }
 
     void OnTeleport(InputValue value)
